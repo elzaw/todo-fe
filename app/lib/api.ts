@@ -1,4 +1,8 @@
-const BASE = process.env.NEXT_PUBLIC_API_URL;
+import axios from 'axios';
+
+const api = axios.create({
+    baseURL: process.env.NEXT_PUBLIC_API_URL,
+});
 
 export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE';
 
@@ -12,44 +16,26 @@ export type Task = {
 
 
 export async function getTasks(): Promise<Task[]> {
-    const res = await fetch(`${BASE}/task`, { cache: 'no-store' });
-    if (!res.ok) throw new Error('Failed to load tasks');
-    const json = await res.json();
-    return json.data;
+    const res = await api.get('/task');
+    return res.data.data;
 }
 
 export async function getTask(id: string): Promise<Task> {
-    const res = await fetch(`${BASE}/task/${id}`, { cache: 'no-store' });
-    if (!res.ok) throw new Error('Failed to load task');
-    const json = await res.json();
-    return json.data;
+    const res = await api.get(`/task/${id}`);
+    return res.data.data;
 }
 
 export async function createTask(data: Omit<Task, 'id' | 'createdAt'>) {
-    const res = await fetch(`${BASE}/task`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-    });
-    if (!res.ok) throw new Error(await res.text());
-    const json = await res.json();
-    return json.data;
+    const res = await api.post('/task', data);
+    return res.data.data;
 }
 
 export async function updateTask(id: string, data: Partial<Omit<Task, 'id' | 'createdAt'>>) {
-    const res = await fetch(`${BASE}/task/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-    });
-    if (!res.ok) throw new Error(await res.text());
-    const json = await res.json();
-    return json.data;
+    const res = await api.patch(`/task/${id}`, data);
+    return res.data.data;
 }
 
 export async function deleteTask(id: string) {
-    const res = await fetch(`${BASE}/task/${id}`, { method: 'DELETE' });
-    if (!res.ok) throw new Error(await res.text());
-    const json = await res.json();
-    return json.data;
+    const res = await api.delete(`/task/${id}`);
+    return res.data.data;
 }
